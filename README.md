@@ -40,3 +40,7 @@ and all are set up.
 
 ![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
+![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-18.04-orange.svg)](https://ubuntu.com/)
+![Windows](https://img.shields.io/badge/Windows-10-blue.svg)](https://www.microsoft.com/en-us/windows/)
+
