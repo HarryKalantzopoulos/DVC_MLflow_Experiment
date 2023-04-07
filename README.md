@@ -20,7 +20,9 @@ More information can be found in https://dagshub.com/rkchelebiev/mlops-dvc-mlflo
 You can define the **.env** file to give your personal environment variables, in order to set up your services.
 
 In this example we are using these urls:
+
 Minio: http://127.0.0.1:9000/
+
 MLflow: http://127.0.0.1:5000/
 
 Then run:
