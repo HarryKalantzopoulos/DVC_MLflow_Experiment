@@ -1,0 +1,8 @@
+code/.ipynb_checkpoints
+/data
+__pycache__
+minio
+pgadmin
+postgres
+cache
+
