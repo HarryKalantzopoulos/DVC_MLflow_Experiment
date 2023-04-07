@@ -1,6 +1,6 @@
 # Version and Tracking experiments with dvc and mlflow
 ---
-
+The main targer
 This is a demo to to version and track experiments,according to MLOps. As a Biomedical Engineer, I am performing a mockup experiment to show how can we use these two services to log informations from all stages of a pipeline. I have already perform a data versioning on https://github.com/HarryKalantzopoulos/dvc_data_version, and by using dvc you can download some data to use. The source of the data is the PICAI-challenge.
 
 For the demonstration I am using:
@@ -32,3 +32,9 @@ docker compose up
 and all are set up.
 
 ---
+
+# Badges
+---
+| Python version | Badge |
+| 3.9            | ![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg) |
+| 3.10           | ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg) |
