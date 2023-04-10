@@ -30,8 +30,6 @@ Then run:
 docker compose up
 ```
 
-and all are set up.
-
 ---
 
 # Badges
