@@ -1,0 +1,129 @@
+stages:
+  read_dataset_info:
+    cmd: python code/read_DS_info.py
+    deps:
+    - code/read_DS_info.py
+    - data
+    outs:
+    - .temp/read_dvc.txt:
+        cache: false
+  pipeline_create:
+    cmd: python code/pipeline_create.py
+    deps:
+    - .temp/read_dvc.txt
+    - code/pipeline_create.py
+    params:
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - .temp/pipeline.txt:
+        cache: false
+  Preprocess:
+    cmd: python code/preprocess.py
+    deps:
+    - .temp/pipeline.txt
+    - code/preprocess.py
+    - data
+    params:
+    - Preprocess.8bit
+    - Preprocess.image_size
+    - Preprocess.maskcrop
+    - Preprocess.resample
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - preprocess/dataset.csv:
+        cache: false
+    - preprocess/images:
+        cache: false
+    - preprocess/masks:
+        cache: false
+  md5_Preprocess:
+    cmd: python code/return_md5.py Preprocess
+    deps:
+    - code/preprocess.py
+    - preprocess/images
+    - preprocess/masks
+    params:
+    - Preprocess.8bit
+    - Preprocess.image_size
+    - Preprocess.maskcrop
+    - Preprocess.resample
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - .temp/Preprocess.txt:
+        cache: false
+  Prepare:
+    cmd: python code/prepare.py
+    deps:
+    - .temp/Preprocess.txt
+    - code/prepare.py
+    - preprocess/dataset.csv
+    params:
+    - Prepare.kfold
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - prepared/kfold.json:
+        cache: false
+  md5_Prepare:
+    cmd: python code/return_md5.py Prepare
+    deps:
+    - code/prepare.py
+    - prepared/kfold.json
+    params:
+    - Prepare.kfold
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - .temp/Prepare.txt:
+        cache: false
+  Train:
+    cmd: python code/train.py
+    deps:
+    - .temp/Prepare.txt
+    - code/train.py
+    - prepared/kfold.json
+    params:
+    - Preprocess.image_size
+    - Train.batch_size
+    - Train.epoch
+    - Train.zscore
+    - mlflow.activate
+    - mlflow.name
+    - model.Number_inputs
+    - model.Number_labels
+    - model.activation
+    - model.architecture
+    - model.dilation
+    - model.filters
+    - model.layer_activation
+    - model.loss
+    - model.metric
+    - model.optimiser
+    outs:
+    - model:
+        cache: false
+  md5_Train:
+    cmd: python code/return_md5.py Train
+    deps:
+    - code/train.py
+    - model
+    params:
+    - Preprocess.image_size
+    - Train.batch_size
+    - Train.epoch
+    - Train.zscore
+    - mlflow.activate
+    - mlflow.name
+    - model.Number_inputs
+    - model.Number_labels
+    - model.activation
+    - model.architecture
+    - model.dilation
+    - model.filters
+    - model.layer_activation
+    - model.loss
+    - model.metric
+    - model.optimiser
