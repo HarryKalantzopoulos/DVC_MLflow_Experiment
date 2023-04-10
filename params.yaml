@@ -1,0 +1,25 @@
+mlflow:
+    activate: True
+    name: 'mydemopipeline'
+Preprocess:
+    image_size: 160
+    resample: [3.0,0.5,0.5] 
+    maskcrop: True
+    8bit: True
+Prepare:
+    kfold: 2
+model:
+    Number_inputs: 1
+    Number_labels: 2
+    filters: [32, 64, 128, 256, 512, 1024]
+    layer_activation: 'ReLU'
+    activation: 'Sigmoid'
+    architecture: 'Unet2D'
+    optimiser: 'adam'
+    loss: 'binary_crossentropy'
+    metric: 'IoU'
+    dilation: [[1,1,15,31],[1,1,15],[1,],[1,],[1,],[1,]]
+Train:
+    epoch: 1
+    batch_size: 10
+    zscore: True
