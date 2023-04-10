@@ -127,7 +127,7 @@ To keep track of these hashes, along with the versions of the used python packag
 
 Since the order of the process depends on the dependencies and outputs, we define a hidden temp folder which stores plain txt files.
 
-To run all the stages, use **dvc repro**. Afterwards, if a stage change (e.g. parameter), **dvc repro** will run only those stages that change.
+To run all the stages, use **dvc repro**. Afterwards, if a stage change (e.g. parameter), **dvc repro** will run only those stages that change. Here, the **dvc.yaml ** and **dvc.lock** are given, so you run dvc repro after you install all the **requirements.txt**.
 
 The MLflow tracking was organized as nested with parent the name of the experiment given in params.yaml. All the other stages are children and train stage has the kfold as children.
 
