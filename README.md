@@ -1,7 +1,7 @@
 # Version and Tracking experiments with dvc and mlflow
 ---
 
-This is a demo to to version and track experiments,according to MLOps. As a Biomedical Engineer, I am performing a mockup experiment to show how can we use these two services to log informations from all stages of a pipeline. I have already perform a data versioning on https://github.com/HarryKalantzopoulos/dvc_data_version, and by using dvc you can download some data to use. The source of the data is the PICAI-challenge.
+This is a demo to to version and track experiments, according to MLOps. As a Biomedical Engineer, I am performing a mockup experiment to show how can we use these two services to log information from all stages of a pipeline. I have already perform a data versioning on https://github.com/HarryKalantzopoulos/dvc_data_version, and by using dvc you can download some data to use. The source of the data is the PICAI-challenge.
 
 For the demonstration I am using:
 1. A local mlflow server, allong with a minio. I am using a docker image found in https://dagshub.com/rkchelebiev/mlops-dvc-mlflow, to deploy a local server.
@@ -29,9 +29,125 @@ Then run:
 ```docker
 docker compose up
 ```
-
 ---
+# DVC and Mlflow
+---
+A demo can be found inside notebooks.
+The organization of the working directory is based on Cookiecutter (https://drivendata.github.io/cookiecutter-data-science/).
 
+After preparing the pipeline (see code directory), dvc is used to track all the code and data changes. Each stage produces metadata which are stored locally in **DS_VERSION.json** and in **MLflow server**. The user can use *params.yaml* to name the experiments and choose other hyperparametes.
+
+To set up your Mlflow server, use the values set in .env at **code.utils.mlflow_setup**.
+
+If you use **dvc add stage** instead of **dvc run**, it will not run the stage and will create only dvc.yaml (registers stage to pipeline), eitherwise it will also create dvc.lock, which is a machine-readable format of dvc.yaml.
+
+The stages are preprocess,prepare (kfold) and train.
+
+e.g. preprocess stage:
+
+```bash
+dvc stage add -n md5_Preprocess \
+    -p params.yaml:Preprocess.image_size,Preprocess.resample,Preprocess.maskcrop,Preprocess.8bit,mlflow.activate,mlflow.name \
+    -d code/preprocess.py -d preprocess/images -d preprocess/masks \
+    -O .temp/Preprocess.txt \
+    python  code/return_md5.py "Preprocess"
+```
+-n: name
+-p: parameters of the stage found in params.yaml
+-d: dependencies
+-O: outputs but DVC will not store cache; if you want cache change to lowercase o
+command line
+
+dvc.yaml
+```yaml
+  Preprocess:
+    cmd: python code/preprocess.py
+    deps:
+    - .temp/pipeline.txt
+    - code/preprocess.py
+    - data
+    params:
+    - Preprocess.8bit
+    - Preprocess.image_size
+    - Preprocess.maskcrop
+    - Preprocess.resample
+    - mlflow.activate
+    - mlflow.name
+    outs:
+    - preprocess/dataset.csv:
+        cache: false
+    - preprocess/images:
+        cache: false
+    - preprocess/masks:
+        cache: false
+```
+
+Inside dvc.lock, after a stage is run, the DVC will create the md5 hashes example:
+
+dvc.lock
+```yaml
+  Preprocess:
+    cmd: python code/preprocess.py
+    deps:
+    - path: .temp/pipeline.txt
+      md5: 14cc740cd377a0fa586b0d318e7453d8
+      size: 13
+    - path: code/preprocess.py
+      md5: 3e53b28ee8c2c83628bab585a2aa6d27
+      size: 6385
+    - path: data
+      md5: ba30de71e034b2e63036d2d2f122e82a.dir
+      size: 86051558
+      nfiles: 20
+    params:
+      params.yaml:
+        Preprocess.8bit: true
+        Preprocess.image_size: 160
+        Preprocess.maskcrop: true
+        Preprocess.resample:
+        - 3.0
+        - 0.5
+        - 0.5
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: preprocess/dataset.csv
+      md5: 4cdfe936c5411d7df5d49fca57d7c625
+      size: 947
+    - path: preprocess/images
+      md5: 8e4531ae96fda58c3f0cddf7bfd8b77c.dir
+      size: 5262475
+      nfiles: 10
+    - path: preprocess/masks
+      md5: 52281e8981938b8ab09752fff303bfea.dir
+      size: 36601
+      nfiles: 10
+```
+To keep track of these hashes, along with the versions of the used python packages, return_md5.py is used after each stage.
+
+Since the order of the process depends on the dependencies and outputs, we define a hidden temp folder which stores plain txt files.
+
+To run all the stages, use **dvc repro**. Afterwards, if a stage change (e.g. parameter), **dvc repro** will run only those stages that change.
+
+The MLflow tracking was organized as nested with parent the name of the experiment given in params.yaml. All the other stages are children and train stage has the kfold as children.
+
+To avoid overflowing MLflow with failed experiments, as long as the name does not change, it is set to delete stage runs that already exist. Except if **dvc repro -f** (force) is used, then another experiment with the same name will be created.
+
+Note that MLflow logs with the commit before the experiment is run, however the dvc related files (dvc.yaml, dvc.lock) can only be commited after the end of the experiment. 
+---
+# Model Registry
+---
+Finally, you can proceed to register your model either manually from MLflow or by using the code/register_model.py.
+
+register_model.py will create and set the model for production.
+---
+# Dockerfile
+---
+Dockerfile exists if you want to run this example with docker, be sure to initialize git first.
+```docker
+docker build -t demo_dvc_mlflow .
+docker run --network=host demo_dvc_mlflow
+```
 # Badges
 ---
 
