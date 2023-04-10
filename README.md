@@ -35,6 +35,18 @@ docker compose up
 A demo can be found inside notebooks.
 The organization of the working directory is based on Cookiecutter (https://drivendata.github.io/cookiecutter-data-science/).
 
+**You will need to download the data from https://github.com/HarryKalantzopoulos/dvc_data_version**.
+
+You only need .dvc and data.dvc to perform dvc pull:
+
+```bash
+git clone https://github.com/HarryKalantzopoulos/dvc_data_version.git .temp
+mv .temp/.dvc ./.dvc
+mv .temp/data.dvc ./data.dvc
+rm -rf .temp
+dvc pull
+```
+
 After preparing the pipeline (see code directory), dvc is used to track all the code and data changes. Each stage produces metadata which are stored locally in **DS_VERSION.json** and in **MLflow server**. The user can use *params.yaml* to name the experiments and choose other hyperparametes.
 
 To set up your Mlflow server, use the values set in .env at **code.utils.mlflow_setup**.
