@@ -50,12 +50,16 @@ dvc stage add -n md5_Preprocess \
     -p params.yaml:Preprocess.image_size,Preprocess.resample,Preprocess.maskcrop,Preprocess.8bit,mlflow.activate,mlflow.name \
     -d code/preprocess.py -d preprocess/images -d preprocess/masks \
     -O .temp/Preprocess.txt \
-    python  code/return_md5.py "Preprocess"
+    python3  code/return_md5.py "Preprocess"
 ```
 -n: name
+
 -p: parameters of the stage found in params.yaml
+
 -d: dependencies
+
 -O: outputs but DVC will not store cache; if you want cache change to lowercase o
+
 command line
 
 dvc.yaml
