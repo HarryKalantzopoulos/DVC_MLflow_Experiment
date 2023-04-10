@@ -1,0 +1,234 @@
+schema: '2.0'
+stages:
+  read_dataset_info:
+    cmd: python code/read_DS_info.py
+    deps:
+    - path: code/read_DS_info.py
+      md5: f5eecb93f4b61f8321b551703c54c574
+      size: 1695
+    - path: data
+      md5: ba30de71e034b2e63036d2d2f122e82a.dir
+      size: 86051558
+      nfiles: 20
+    outs:
+    - path: .temp/read_dvc.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+  pipeline_create:
+    cmd: python code/pipeline_create.py
+    deps:
+    - path: .temp/read_dvc.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+    - path: code/pipeline_create.py
+      md5: 2d0b835a61d0b658c3eee0ec868a7bbc
+      size: 1166
+    params:
+      params.yaml:
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: .temp/pipeline.txt
+      md5: 14cc740cd377a0fa586b0d318e7453d8
+      size: 13
+  Preprocess:
+    cmd: python code/preprocess.py
+    deps:
+    - path: .temp/pipeline.txt
+      md5: 14cc740cd377a0fa586b0d318e7453d8
+      size: 13
+    - path: code/preprocess.py
+      md5: 3e53b28ee8c2c83628bab585a2aa6d27
+      size: 6385
+    - path: data
+      md5: ba30de71e034b2e63036d2d2f122e82a.dir
+      size: 86051558
+      nfiles: 20
+    params:
+      params.yaml:
+        Preprocess.8bit: true
+        Preprocess.image_size: 160
+        Preprocess.maskcrop: true
+        Preprocess.resample:
+        - 3.0
+        - 0.5
+        - 0.5
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: preprocess/dataset.csv
+      md5: 4cdfe936c5411d7df5d49fca57d7c625
+      size: 947
+    - path: preprocess/images
+      md5: 8e4531ae96fda58c3f0cddf7bfd8b77c.dir
+      size: 5262475
+      nfiles: 10
+    - path: preprocess/masks
+      md5: 52281e8981938b8ab09752fff303bfea.dir
+      size: 36601
+      nfiles: 10
+  md5_Preprocess:
+    cmd: python code/return_md5.py Preprocess
+    deps:
+    - path: code/preprocess.py
+      md5: 3e53b28ee8c2c83628bab585a2aa6d27
+      size: 6385
+    - path: preprocess/images
+      md5: 8e4531ae96fda58c3f0cddf7bfd8b77c.dir
+      size: 5262475
+      nfiles: 10
+    - path: preprocess/masks
+      md5: 52281e8981938b8ab09752fff303bfea.dir
+      size: 36601
+      nfiles: 10
+    params:
+      params.yaml:
+        Preprocess.8bit: true
+        Preprocess.image_size: 160
+        Preprocess.maskcrop: true
+        Preprocess.resample:
+        - 3.0
+        - 0.5
+        - 0.5
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: .temp/Preprocess.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+  Prepare:
+    cmd: python code/prepare.py
+    deps:
+    - path: .temp/Preprocess.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+    - path: code/prepare.py
+      md5: b540804dc9221c3417c041f43d0dd89b
+      size: 2203
+    - path: preprocess/dataset.csv
+      md5: 4cdfe936c5411d7df5d49fca57d7c625
+      size: 947
+    params:
+      params.yaml:
+        Prepare.kfold: 2
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: prepared/kfold.json
+      md5: 9cb23f2d7acf2806e6875cdc65144784
+      size: 771
+  md5_Prepare:
+    cmd: python code/return_md5.py Prepare
+    deps:
+    - path: code/prepare.py
+      md5: b540804dc9221c3417c041f43d0dd89b
+      size: 2203
+    - path: prepared/kfold.json
+      md5: 9cb23f2d7acf2806e6875cdc65144784
+      size: 771
+    params:
+      params.yaml:
+        Prepare.kfold: 2
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+    outs:
+    - path: .temp/Prepare.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+  Train:
+    cmd: python code/train.py
+    deps:
+    - path: .temp/Prepare.txt
+      md5: e0aa021e21dddbd6d8cecec71e9cf564
+      size: 2
+    - path: code/train.py
+      md5: 9f08727232a4e50f68c0b368161f1d14
+      size: 7050
+    - path: prepared/kfold.json
+      md5: 9cb23f2d7acf2806e6875cdc65144784
+      size: 771
+    params:
+      params.yaml:
+        Preprocess.image_size: 160
+        Train.batch_size: 10
+        Train.epoch: 1
+        Train.zscore: true
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+        model.Number_inputs: 1
+        model.Number_labels: 2
+        model.activation: Sigmoid
+        model.architecture: Unet2D
+        model.dilation:
+        - - 1
+          - 1
+          - 15
+          - 31
+        - - 1
+          - 1
+          - 15
+        - - 1
+        - - 1
+        - - 1
+        - - 1
+        model.filters:
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+        model.layer_activation: ReLU
+        model.loss: binary_crossentropy
+        model.metric: IoU
+        model.optimiser: adam
+    outs:
+    - path: model
+      md5: 5f1724d454dad6de8e722044b0db1c5f.dir
+      size: 831319837
+      nfiles: 4
+  md5_Train:
+    cmd: python code/return_md5.py Train
+    deps:
+    - path: code/train.py
+      md5: 9f08727232a4e50f68c0b368161f1d14
+      size: 7050
+    - path: model
+      md5: 5f1724d454dad6de8e722044b0db1c5f.dir
+      size: 831319837
+      nfiles: 4
+    params:
+      params.yaml:
+        Preprocess.image_size: 160
+        Train.batch_size: 10
+        Train.epoch: 1
+        Train.zscore: true
+        mlflow.activate: true
+        mlflow.name: mydemopipeline
+        model.Number_inputs: 1
+        model.Number_labels: 2
+        model.activation: Sigmoid
+        model.architecture: Unet2D
+        model.dilation:
+        - - 1
+          - 1
+          - 15
+          - 31
+        - - 1
+          - 1
+          - 15
+        - - 1
+        - - 1
+        - - 1
+        - - 1
+        model.filters:
+        - 32
+        - 64
+        - 128
+        - 256
+        - 512
+        - 1024
+        model.layer_activation: ReLU
+        model.loss: binary_crossentropy
+        model.metric: IoU
+        model.optimiser: adam
