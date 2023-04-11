@@ -1,7 +1,7 @@
 # Version and Tracking experiments with dvc and mlflow
 ---
 
-This is a demo to to version and track experiments, according to MLOps. As a Biomedical Engineer, I am performing a mockup experiment to show how can we use these two services to log information from all stages of a pipeline. I have already perform a data versioning on https://github.com/HarryKalantzopoulos/dvc_data_version, and by using dvc you can download some data to use. The source of the data is the PICAI-challenge.
+This is a demo to version and track experiments, according to MLOps. As a Biomedical Engineer, I am performing a mockup experiment to show how can we use these two services to log information from all stages of a pipeline. I have already performed a data versioning on https://github.com/HarryKalantzopoulos/dvc_data_version, and by using dvc you can download some data to use. The source of the data is the PICAI-challenge.
 
 For the demonstration I am using:
 1. A local mlflow server, allong with a minio. I am using a docker image found in https://dagshub.com/rkchelebiev/mlops-dvc-mlflow, to deploy a local server.
